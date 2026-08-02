@@ -74,6 +74,21 @@ void SetChangeClass(CHARACTER* c);
 int LevelConvert(BYTE Level);
 float CharacterMoveSpeed(CHARACTER* c);
 
+/// Returns the tile the character is physically standing on, derived from its world position.
+///
+/// This is deliberately NOT CHARACTER::PositionX/Y. MovePath (ZzzAI.cpp) advances those to the
+/// *next* path node as soon as a transition starts, not when it ends, and that advance is
+/// load-bearing: MoveCharactersClient builds the TW_CHARACTER occupancy map out of PositionX/Y
+/// and PathFinding2 consumes it through iDefaultWall, so two characters never walk into the same
+/// tile. The advance has to stay.
+///
+/// What PositionX/Y must not be used for is telling the server where we are, or as the origin of
+/// a re-path. PathFinding2 resets CurrentPath and CurrentPathFloat, which re-arms the advance, so
+/// every re-emission of a walk declares one more tile than the character actually walked - at the
+/// frame-driven cadence of MouseUpdateTimeMax instead of at walking speed.
+int GetCurrentTileX(const CHARACTER* c);
+int GetCurrentTileY(const CHARACTER* c);
+
 bool CheckMonsterSkill(CHARACTER* c, OBJECT* o);
 bool CharacterAnimation(CHARACTER* c, OBJECT* o);
 bool AttackStage(CHARACTER* c, OBJECT* o);

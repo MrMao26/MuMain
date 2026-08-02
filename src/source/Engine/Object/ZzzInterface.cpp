@@ -1075,8 +1075,8 @@ void LetHeroStop(CHARACTER* c, BOOL bSetMovementFalse)
 {
     BYTE PathX[1];
     BYTE PathY[1];
-    PathX[0] = (Hero->PositionX);
-    PathY[0] = (Hero->PositionY);
+    PathX[0] = GetCurrentTileX(Hero);
+    PathY[0] = GetCurrentTileY(Hero);
 
     SendCharacterMove(Hero->Key, Hero->Object.Angle[2], 1, PathX, PathY, TargetX, TargetY);
 
@@ -1287,7 +1287,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         {
             if (gCharacterManager.GetBaseClass(c->Class) == CLASS_ELF)
             {
-                if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Range))
+                if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path, Range))
                 {
                     c->Movement = true;
                 }
@@ -1304,8 +1304,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         c->Movement = false;
         BYTE PathX[1];
         BYTE PathY[1];
-        PathX[0] = (c->PositionX);
-        PathY[0] = (c->PositionY);
+        PathX[0] = GetCurrentTileX(c);
+        PathY[0] = GetCurrentTileY(c);
         c->TargetCharacter = ActionTarget;
         int Dir = ((BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8);
         c->Skill = 0;
@@ -1356,7 +1356,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 }
                 else
                 {
-                    if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance * 1.2f))
+                    if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path, Distance * 1.2f))
                     {
                         c->Movement = true;
                     }
@@ -1383,8 +1383,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
                 if (CheckTile(c, o, Distance) && !c->SafeZone)
                 {
-                    bool Wall = CheckWall((c->PositionX),
-                        (c->PositionY), TargetX, TargetY);
+                    bool Wall = CheckWall(GetCurrentTileX(c),
+                        GetCurrentTileY(c), TargetX, TargetY);
                     if (Wall)
                     {
                         GameLogic::Combat::UseSkillWizard(c, o);
@@ -1392,7 +1392,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 }
                 else
                 {
-                    if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
+                    if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path, Distance))
                     {
                         c->Movement = true;
                     }
@@ -1408,8 +1408,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
                 if (CheckTile(c, o, Distance) && !c->SafeZone)
                 {
-                    bool Wall = CheckWall((c->PositionX),
-                        (c->PositionY), TargetX, TargetY);
+                    bool Wall = CheckWall(GetCurrentTileX(c),
+                        GetCurrentTileY(c), TargetX, TargetY);
                     if (Wall)
                     {
                         GameLogic::Combat::UseSkillElf(c, o);
@@ -1417,7 +1417,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 }
                 else
                 {
-                    if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
+                    if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path, Distance))
                     {
                         c->Movement = true;
                     }
@@ -1438,8 +1438,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 TargetY = (int)(CharactersClient[g_MovementSkill.m_iTarget].Object.Position[1] / TERRAIN_SCALE);
                 if (CheckTile(c, o, Distance) && !c->SafeZone)
                 {
-                    bool Wall = CheckWall((c->PositionX),
-                        (c->PositionY), TargetX, TargetY);
+                    bool Wall = CheckWall(GetCurrentTileX(c),
+                        GetCurrentTileY(c), TargetX, TargetY);
                     if (Wall)
                     {
                         GameLogic::Combat::UseSkillElf(c, o);
@@ -1447,7 +1447,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 }
                 else
                 {
-                    if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
+                    if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path, Distance))
                     {
                         c->Movement = true;
                     }
@@ -1489,7 +1489,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 }
                 else
                 {
-                    if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance * 1.2f))
+                    if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path, Distance * 1.2f))
                         c->Movement = true;
                 }
             }
@@ -3118,7 +3118,7 @@ void MoveHero()
                 ActionTarget = g_iFollowCharacter;
                 TargetX = (int)(followCharacter->Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(followCharacter->Object.Position[1] / TERRAIN_SCALE);
-                if (PathFinding2((c->PositionX), (c->PositionY), TargetX, TargetY, &c->Path))
+                if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path))
                     SendMove(c, o);
             }
         }
@@ -3172,7 +3172,7 @@ void MoveHero()
                 {
                     if (gCharacterManager.GetEquipedBowType(CharacterMachine->Equipment) != BOWTYPE_NONE)
                     {
-                        SocketClient->ToGameServer()->SendInstantMoveRequest(c->PositionX, c->PositionY);
+                        SocketClient->ToGameServer()->SendInstantMoveRequest(GetCurrentTileX(c), GetCurrentTileY(c));
                     }
                 }
 #endif
@@ -3186,9 +3186,9 @@ void MoveHero()
                     TargetX = (int)(CharactersClient[ActionTarget].Object.Position[0] / TERRAIN_SCALE);
                     TargetY = (int)(CharactersClient[ActionTarget].Object.Position[1] / TERRAIN_SCALE);
 
-                    if (CheckWall((c->PositionX), (c->PositionY), TargetX, TargetY))
+                    if (CheckWall(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY))
                     {
-                        if (!PathFinding2((c->PositionX), (c->PositionY), TargetX, TargetY, &c->Path))
+                        if (!PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path))
                         {
                             if (CheckArrow() == false)
                             {
@@ -3226,7 +3226,7 @@ void MoveHero()
                         c->MovementType = MOVEMENT_OPERATE;
                         TargetType = Operates[SelectedOperate].Owner->Type;
                         TargetAngle = Operates[SelectedOperate].Owner->Angle[2];
-                        if (PathFinding2((c->PositionX), (c->PositionY), TargetX, TargetY, &c->Path))
+                        if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path))
                             SendMove(c, o);
                         else
                             Action(c, o, true);
@@ -3274,7 +3274,7 @@ void MoveHero()
                     }
                     else
                     {
-                        if (PathFinding2((c->PositionX), (c->PositionY), TargetX, TargetY, &c->Path))
+                        if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path))
                             SendMove(c, o);
                         else
                             Action(c, o, true);
@@ -3282,7 +3282,7 @@ void MoveHero()
                 }
                 else
                 {
-                    if (PathFinding2((c->PositionX), (c->PositionY), TargetX, TargetY, &c->Path))
+                    if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path))
                         SendMove(c, o);
                     else
                         Action(c, o, true);
@@ -3294,7 +3294,7 @@ void MoveHero()
                 ItemKey = SelectedItem;
                 TargetX = (int)(Items[SelectedItem].Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(Items[SelectedItem].Object.Position[1] / TERRAIN_SCALE);
-                if (PathFinding2((c->PositionX), (c->PositionY), TargetX, TargetY, &c->Path))
+                if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path))
                     SendMove(c, o);
                 else
                 {
@@ -3328,7 +3328,7 @@ void MoveHero()
                     if (!c->Movement || (abs((c->PositionX) - xPos) < 2 && abs((c->PositionY) - yPos) < 2))
                     {
                         if (((c->PositionX) != TargetX || (c->PositionY) != TargetY || !c->Movement) &&
-                            PathFinding2((c->PositionX), (c->PositionY), TargetX, TargetY, &c->Path))
+                            PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path))
                         {
                             c->MovementType = MOVEMENT_MOVE;
                             SendMove(c, o);

@@ -100,7 +100,7 @@ bool CastWarriorSkill(CHARACTER* c, OBJECT* o, ITEM* p, ActionSkillType iSkill)
         UseSkillWarrior(c, o);
         Success = true;
     }
-    else if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
+    else if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path, Distance))
     {
         c->Movement = true;
         c->MovementType = MOVEMENT_SKILL;
@@ -397,7 +397,7 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
             || Skill == AT_SKILL_FIRE_SLASH_STR
             )
         {
-            SendRequestMagicContinue(Skill, (c->PositionX), (c->PositionY), 
+            SendRequestMagicContinue(Skill, GetCurrentTileX(c), GetCurrentTileY(c), 
                 (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, TKey, 0);
         }
         else
@@ -722,7 +722,7 @@ void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj)
     case AT_SKILL_ALICE_WEAKNESS:
     case AT_SKILL_ALICE_ENERVATION:
         LetHeroStop();
-        SendRequestMagicContinue(iSkill, pCha->PositionX, pCha->PositionY, (BYTE)(pObj->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
+        SendRequestMagicContinue(iSkill, GetCurrentTileX(pCha), GetCurrentTileY(pCha), (BYTE)(pObj->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
         switch (pCha->Helper.Type)
         {
         case MODEL_HORN_OF_UNIRIA:
@@ -903,8 +903,8 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
         {
             TKey = CharactersClient[g_MovementSkill.m_iTarget].Key;
         }
-        BYTE byValue = GetDestValue((pCha->PositionX), (pCha->PositionY), TargetX, TargetY);
-        SendRequestMagicContinue(iSkill, pCha->PositionX, pCha->PositionY, ((pObj->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
+        BYTE byValue = GetDestValue(GetCurrentTileX(pCha), GetCurrentTileY(pCha), TargetX, TargetY);
+        SendRequestMagicContinue(iSkill, GetCurrentTileX(pCha), GetCurrentTileY(pCha), ((pObj->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
 
         pObj->m_sTargetIndex = g_MovementSkill.m_iTarget;
         g_CMonkSystem.RageCreateEffect(pObj, iSkill);
@@ -941,7 +941,7 @@ void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj)
         WORD TKey = 0xffff;
         TKey = getTargetCharacterKey(pCha, g_MovementSkill.m_iTarget);
         pCha->m_iFenrirSkillTarget = g_MovementSkill.m_iTarget;
-        SendRequestMagicContinue(iSkill, (pCha->PositionX), (pCha->PositionY), (BYTE)(pObj->Angle[2] / 360.f * 256.f), 0, pos, TKey, &pObj->m_bySkillSerialNum);
+        SendRequestMagicContinue(iSkill, GetCurrentTileX(pCha), GetCurrentTileY(pCha), (BYTE)(pObj->Angle[2] / 360.f * 256.f), 0, pos, TKey, &pObj->m_bySkillSerialNum);
         pCha->Movement = 0;
 
         if (pObj->Type == MODEL_PLAYER)
@@ -1026,14 +1026,14 @@ void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance)
                     fDistance = gSkillManager.GetSkillDistance(nSkill, pCha) * 1.2f;
                     if (CheckTile(pCha, pObj, fDistance) && pCha->SafeZone == false)
                     {
-                        bool bNoneWall = CheckWall((pCha->PositionX), (pCha->PositionY), TargetX, TargetY);
+                        bool bNoneWall = CheckWall(GetCurrentTileX(pCha), GetCurrentTileY(pCha), TargetX, TargetY);
                         g_ConsoleDebug->Write(MCD_SEND, L"check wall %d", bNoneWall);
                         if (bNoneWall)
                             UseSkillRagefighter(pCha, pObj);
                     }
                     else
                     {
-                        if (PathFinding2(pCha->PositionX, pCha->PositionY, TargetX, TargetY, &pCha->Path, fDistance))
+                        if (PathFinding2(GetCurrentTileX(pCha), GetCurrentTileY(pCha), TargetX, TargetY, &pCha->Path, fDistance))
                         {
                             pCha->Movement = true;
                             pCha->MovementType = MOVEMENT_SKILL;
@@ -1078,7 +1078,7 @@ void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance)
             {
                 if (g_MovementSkill.m_iTarget != -1)
                 {
-                    if (PathFinding2(pCha->PositionX, pCha->PositionY, nTargetX, nTargetY, &pCha->Path, fDistance * 1.2f))
+                    if (PathFinding2(GetCurrentTileX(pCha), GetCurrentTileY(pCha), nTargetX, nTargetY, &pCha->Path, fDistance * 1.2f))
                     {
                         pCha->Movement = true;
                     }
@@ -1199,8 +1199,8 @@ bool SkillElf(CHARACTER* c, ITEM* p)
                     {
                         TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
                     }
-                    SendRequestMagicContinue(Spe_Num, (c->PositionX),
-                        (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, TKey, 0);
+                    SendRequestMagicContinue(Spe_Num, GetCurrentTileX(c),
+                        GetCurrentTileY(c), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, TKey, 0);
                     SetPlayerAttack(c);
                     if (o->Type != MODEL_PLAYER && o->Kind != KIND_PLAYER)
                         CreateArrows(c, o, NULL, FindHotKey((c->Skill)), 1);
@@ -1217,7 +1217,7 @@ bool SkillElf(CHARACTER* c, ITEM* p)
                 if (CheckTile(c, o, Distance))
                 {
                     o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
-                    BYTE byValue = GetDestValue((c->PositionX), (c->PositionY), TargetX, TargetY);
+                    BYTE byValue = GetDestValue(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY);
 
                     BYTE angle = (BYTE)((((o->Angle[2] + 180.f) / 360.f) * 255.f));
                     WORD TKey = 0xffff;
@@ -1225,8 +1225,8 @@ bool SkillElf(CHARACTER* c, ITEM* p)
                     {
                         TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
                     }
-                    SendRequestMagicContinue(Spe_Num, (c->PositionX),
-                        (c->PositionY), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
+                    SendRequestMagicContinue(Spe_Num, GetCurrentTileX(c),
+                        GetCurrentTileY(c), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
                     SetPlayerAttack(c);
                     if (o->Type != MODEL_PLAYER)
                         CreateArrows(c, o, NULL, FindHotKey((c->Skill)), Spe_Num - AT_SKILL_BLAST_CROSSBOW4 + 2);

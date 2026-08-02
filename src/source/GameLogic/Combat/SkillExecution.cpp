@@ -316,7 +316,7 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
     {
         CheckTarget(c);
 
-        if (CheckWall((c->PositionX), (c->PositionY), TargetX, TargetY))
+        if (CheckWall(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY))
         {
             for (int i = EQUIPMENT_WEAPON_RIGHT; i <= EQUIPMENT_WEAPON_LEFT; i++)
             {
@@ -387,7 +387,7 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
         }
         else
         {
-            if (PathFinding2((c->PositionX), (c->PositionY), TargetX, TargetY, &c->Path))
+            if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path))
             {
                 SendMove(c, o);
                 return 0;

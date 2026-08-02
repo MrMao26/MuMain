@@ -6277,6 +6277,16 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
     }
 }
 
+int GetCurrentTileX(const CHARACTER* c)
+{
+    return (int)(c->Object.Position[0] / TERRAIN_SCALE);
+}
+
+int GetCurrentTileY(const CHARACTER* c)
+{
+    return (int)(c->Object.Position[1] / TERRAIN_SCALE);
+}
+
 float CharacterMoveSpeed(CHARACTER* c)
 {
     OBJECT* o = &c->Object;

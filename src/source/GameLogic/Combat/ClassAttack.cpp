@@ -140,8 +140,8 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
                 {
                     TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
                 }
-                SendRequestMagicContinue(Skill, (c->PositionX),
-                    (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, TKey, 0);
+                SendRequestMagicContinue(Skill, GetCurrentTileX(c),
+                    GetCurrentTileY(c), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, TKey, 0);
                 SetPlayerAttack(c);
                 if (o->Type != MODEL_PLAYER)
                 {
@@ -179,7 +179,7 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
 
             if (!CheckTile(c, o, Distance))
             {
-                if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
+                if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path, Distance))
                 {
                     c->Movement = true;
                     c->MovementType = MOVEMENT_SKILL;
@@ -223,7 +223,7 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
         {
             if (CharactersClient[SelectedCharacter].Object.Kind == KIND_PLAYER)
             {
-                if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
+                if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path, Distance))
                 {
                     c->Movement = true;
                     c->MovementType = MOVEMENT_SKILL;
@@ -237,7 +237,7 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
             )
             return;
     }
-    bool Wall = CheckWall((c->PositionX), (c->PositionY), TargetX, TargetY);
+    bool Wall = CheckWall(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY);
     if (Wall)
     {
         if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
@@ -336,12 +336,12 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
         {
             BYTE PathX[1];
             BYTE PathY[1];
-            PathX[0] = (c->PositionX);
-            PathY[0] = (c->PositionY);
+            PathX[0] = GetCurrentTileX(c);
+            PathY[0] = GetCurrentTileY(c);
 
             SendCharacterMove(c->Key, o->Angle[2], 1, &PathX[0], &PathY[0], TargetX, TargetY);
 
-            BYTE byValue = GetDestValue((c->PositionX), (c->PositionY), TargetX, TargetY);
+            BYTE byValue = GetDestValue(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY);
 
             BYTE angle = (BYTE)((((o->Angle[2] + 180.f) / 360.f) * 255.f));
             WORD TKey = 0xffff;
@@ -350,8 +350,8 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
                 TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
             }
 
-            SendRequestMagicContinue(Skill, (c->PositionX),
-                (c->PositionY), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
+            SendRequestMagicContinue(Skill, GetCurrentTileX(c),
+                GetCurrentTileY(c), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
             SetAttackSpeed();
             //									SetAction(o, PLAYER_SKILL_FLAMESTRIKE);
             c->Movement = 0;
@@ -437,8 +437,8 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
 
                 TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
                 c->m_iFenrirSkillTarget = g_MovementSkill.m_iTarget;
-                SendRequestMagicContinue(Skill, (c->PositionX),
-                    (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, pos, TKey, &o->m_bySkillSerialNum);
+                SendRequestMagicContinue(Skill, GetCurrentTileX(c),
+                    GetCurrentTileY(c), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, pos, TKey, &o->m_bySkillSerialNum);
                 c->Movement = 0;
 
                 if (o->Type == MODEL_PLAYER)
@@ -455,7 +455,7 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
         {
             if (g_MovementSkill.m_iTarget != -1)
             {
-                if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance * 1.2f))
+                if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path, Distance * 1.2f))
                 {
                     c->Movement = true;
                 }
@@ -609,8 +609,8 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                 {
                     BYTE PathX[1];
                     BYTE PathY[1];
-                    PathX[0] = (c->PositionX);
-                    PathY[0] = (c->PositionY);
+                    PathX[0] = GetCurrentTileX(c);
+                    PathY[0] = GetCurrentTileY(c);
 
                     SendCharacterMove(c->Key, o->Angle[2], 1, &PathX[0], &PathY[0], TargetX, TargetY);
 
@@ -619,8 +619,8 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                     {
                         TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
                     }
-                    SendRequestMagicContinue(Skill, (c->PositionX),
-                        (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, TKey, 0);
+                    SendRequestMagicContinue(Skill, GetCurrentTileX(c),
+                        GetCurrentTileY(c), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, TKey, 0);
                     SetAttackSpeed();
                     SetAction(o, PLAYER_ATTACK_SKILL_WHEEL);
 
@@ -641,15 +641,15 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
 
                     if (CheckTile(c, o, Distance))
                     {
-                        BYTE byValue = GetDestValue((c->PositionX), (c->PositionY), TargetX, TargetY);
+                        BYTE byValue = GetDestValue(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY);
 
                         WORD TKey = 0xffff;
                         if (g_MovementSkill.m_iTarget != -1)
                         {
                             TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
                         }
-                        SendRequestMagicContinue(Skill, (c->PositionX),
-                            (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), byValue, 0, TKey, 0);
+                        SendRequestMagicContinue(Skill, GetCurrentTileX(c),
+                            GetCurrentTileY(c), (BYTE)(o->Angle[2] / 360.f * 256.f), byValue, 0, TKey, 0);
                         SetAttackSpeed();
 
                         SetAction(o, PLAYER_ATTACK_SKILL_WHEEL);
@@ -667,12 +667,12 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                     {
                         BYTE PathX[1];
                         BYTE PathY[1];
-                        PathX[0] = (c->PositionX);
-                        PathY[0] = (c->PositionY);
+                        PathX[0] = GetCurrentTileX(c);
+                        PathY[0] = GetCurrentTileY(c);
 
                         SendCharacterMove(c->Key, o->Angle[2], 1, &PathX[0], &PathY[0], TargetX, TargetY);
 
-                        BYTE byValue = GetDestValue((c->PositionX), (c->PositionY), TargetX, TargetY);
+                        BYTE byValue = GetDestValue(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY);
 
                         BYTE angle = (BYTE)((((o->Angle[2] + 180.f) / 360.f) * 255.f));
                         WORD TKey = 0xffff;
@@ -680,8 +680,8 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                         {
                             TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
                         }
-                        SendRequestMagicContinue(Skill, (c->PositionX),
-                            (c->PositionY), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
+                        SendRequestMagicContinue(Skill, GetCurrentTileX(c),
+                            GetCurrentTileY(c), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
                         SetAttackSpeed();
                         if (c->Helper.Type == MODEL_HORN_OF_FENRIR && !c->SafeZone)
                         {
@@ -703,12 +703,12 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                 {
                     BYTE PathX[1];
                     BYTE PathY[1];
-                    PathX[0] = (c->PositionX);
-                    PathY[0] = (c->PositionY);
+                    PathX[0] = GetCurrentTileX(c);
+                    PathY[0] = GetCurrentTileY(c);
 
                     SendCharacterMove(c->Key, o->Angle[2], 1, &PathX[0], &PathY[0], TargetX, TargetY);
 
-                    BYTE byValue = GetDestValue((c->PositionX), (c->PositionY), TargetX, TargetY);
+                    BYTE byValue = GetDestValue(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY);
 
                     BYTE angle = (BYTE)((((o->Angle[2] + 180.f) / 360.f) * 255.f));
                     WORD TKey = 0xffff;
@@ -721,8 +721,8 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                             TKey = st->Key;
                         }
                     }
-                    SendRequestMagicContinue(Skill, (c->PositionX),
-                        (c->PositionY), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
+                    SendRequestMagicContinue(Skill, GetCurrentTileX(c),
+                        GetCurrentTileY(c), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
                     SetAttackSpeed();
                     //									SetAction(o, PLAYER_SKILL_FLAMESTRIKE);
                     c->Movement = 0;
@@ -776,7 +776,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                 }
                 else
                 {
-                    if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
+                    if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path, Distance))
                     {
                         c->Movement = true;
                     }
@@ -791,12 +791,12 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                 {
                     BYTE PathX[1];
                     BYTE PathY[1];
-                    PathX[0] = (c->PositionX);
-                    PathY[0] = (c->PositionY);
+                    PathX[0] = GetCurrentTileX(c);
+                    PathY[0] = GetCurrentTileY(c);
 
                     SendCharacterMove(c->Key, o->Angle[2], 1, &PathX[0], &PathY[0], TargetX, TargetY);
 
-                    BYTE byValue = GetDestValue((c->PositionX), (c->PositionY), TargetX, TargetY);
+                    BYTE byValue = GetDestValue(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY);
 
                     BYTE angle = (BYTE)((((o->Angle[2] + 180.f) / 360.f) * 255.f));
                     WORD TKey = 0xffff;
@@ -804,8 +804,8 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                     {
                         TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
                     }
-                    SendRequestMagicContinue(Skill, (c->PositionX),
-                        (c->PositionY), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
+                    SendRequestMagicContinue(Skill, GetCurrentTileX(c),
+                        GetCurrentTileY(c), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
                     SetAttackSpeed();
                     SetAction(o, PLAYER_SKILL_FLAMESTRIKE);
                     c->Movement = 0;
@@ -821,12 +821,12 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                 {
                     BYTE PathX[1];
                     BYTE PathY[1];
-                    PathX[0] = (c->PositionX);
-                    PathY[0] = (c->PositionY);
+                    PathX[0] = GetCurrentTileX(c);
+                    PathY[0] = GetCurrentTileY(c);
 
                     SendCharacterMove(c->Key, o->Angle[2], 1, &PathX[0], &PathY[0], TargetX, TargetY);
 
-                    BYTE byValue = GetDestValue((c->PositionX), (c->PositionY), TargetX, TargetY);
+                    BYTE byValue = GetDestValue(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY);
 
                     BYTE angle = (BYTE)((((o->Angle[2] + 180.f) / 360.f) * 255.f));
                     WORD TKey = 0xffff;
@@ -834,8 +834,8 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                     {
                         TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
                     }
-                    SendRequestMagicContinue(Skill, (c->PositionX),
-                        (c->PositionY), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
+                    SendRequestMagicContinue(Skill, GetCurrentTileX(c),
+                        GetCurrentTileY(c), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
                     SetAttackSpeed();
                     SetAction(o, PLAYER_SKILL_GIGANTICSTORM);
                     c->Movement = 0;
@@ -869,7 +869,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                 {
                     int TargetX = (int)(c->TargetPosition[0] / TERRAIN_SCALE);
                     int TargetY = (int)(c->TargetPosition[1] / TERRAIN_SCALE);
-                    BYTE byValue = GetDestValue((c->PositionX), (c->PositionY), TargetX, TargetY);
+                    BYTE byValue = GetDestValue(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY);
 
                     BYTE pos = CalcTargetPos(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
                     WORD TKey = 0xffff;
@@ -879,8 +879,8 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                     }
                     o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
                     CheckClientArrow(o);
-                    SendRequestMagicContinue(Skill, (c->PositionX),
-                        (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), byValue, pos, TKey, 0);
+                    SendRequestMagicContinue(Skill, GetCurrentTileX(c),
+                        GetCurrentTileY(c), (BYTE)(o->Angle[2] / 360.f * 256.f), byValue, pos, TKey, 0);
 
                     SetAttackSpeed();
                     {
@@ -917,7 +917,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                 {
                     int TargetX = (int)(c->TargetPosition[0] / TERRAIN_SCALE);
                     int TargetY = (int)(c->TargetPosition[1] / TERRAIN_SCALE);
-                    BYTE byValue = GetDestValue((c->PositionX), (c->PositionY), TargetX, TargetY);
+                    BYTE byValue = GetDestValue(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY);
 
                     BYTE pos = CalcTargetPos(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
                     WORD TKey = 0xffff;
@@ -926,8 +926,8 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                         TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
                     }
                     o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
-                    SendRequestMagicContinue(Skill, (c->PositionX),
-                        (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), byValue, pos, TKey, 0);
+                    SendRequestMagicContinue(Skill, GetCurrentTileX(c),
+                        GetCurrentTileY(c), (BYTE)(o->Angle[2] / 360.f * 256.f), byValue, pos, TKey, 0);
                     SetAttackSpeed();
 
                     if (Skill == AT_SKILL_THUNDER_STRIKE)
@@ -981,8 +981,8 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                     {
                         TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
                     }
-                    SendRequestMagicContinue(Skill, (c->PositionX),
-                        (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, pos, TKey, 0);
+                    SendRequestMagicContinue(Skill, GetCurrentTileX(c),
+                        GetCurrentTileY(c), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, pos, TKey, 0);
                     SetAction(o, PLAYER_ATTACK_SKILL_FURY_STRIKE);
                     c->Movement = 0;
                 }
@@ -1033,8 +1033,8 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
 
                         TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
                         c->m_iFenrirSkillTarget = g_MovementSkill.m_iTarget;
-                        SendRequestMagicContinue(Skill, (c->PositionX),
-                            (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, pos, TKey, &o->m_bySkillSerialNum);
+                        SendRequestMagicContinue(Skill, GetCurrentTileX(c),
+                            GetCurrentTileY(c), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, pos, TKey, &o->m_bySkillSerialNum);
                         c->Movement = 0;
 
                         if (o->Type == MODEL_PLAYER)
@@ -1051,7 +1051,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                 {
                     if (g_MovementSkill.m_iTarget != -1)
                     {
-                        if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance * 1.2f))
+                        if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path, Distance * 1.2f))
                         {
                             c->Movement = true;
                         }
@@ -1179,7 +1179,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
                 {
                     if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
                     {
-                        if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
+                        if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path, Distance))
                         {
                             c->Movement = true;
                             c->MovementType = MOVEMENT_SKILL;
@@ -1202,8 +1202,8 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
     case AT_SKILL_HELL_FIRE:
     case AT_SKILL_HELL_FIRE_STR:
     {
-        SendRequestMagicContinue(Skill, (c->PositionX),
-            (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
+        SendRequestMagicContinue(Skill, GetCurrentTileX(c),
+            GetCurrentTileY(c), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
         SetAttackSpeed();
         SetAction(o, PLAYER_SKILL_HELL);
         c->Movement = 0;
@@ -1213,8 +1213,8 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
     case AT_SKILL_INFERNO_STR:
     case AT_SKILL_INFERNO_STR_MG:
     {
-        SendRequestMagicContinue(Skill, (c->PositionX),
-            (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
+        SendRequestMagicContinue(Skill, GetCurrentTileX(c),
+            GetCurrentTileY(c), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
         SetAttackSpeed();
         SetAction(o, PLAYER_SKILL_INFERNO);
         c->Movement = 0;
@@ -1245,8 +1245,8 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
 
                 TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
                 c->m_iFenrirSkillTarget = g_MovementSkill.m_iTarget;
-                SendRequestMagicContinue(Skill, (c->PositionX),
-                    (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, pos, TKey, &o->m_bySkillSerialNum);
+                SendRequestMagicContinue(Skill, GetCurrentTileX(c),
+                    GetCurrentTileY(c), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, pos, TKey, &o->m_bySkillSerialNum);
                 c->Movement = 0;
 
                 if (o->Type == MODEL_PLAYER)
@@ -1263,7 +1263,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
         {
             if (g_MovementSkill.m_iTarget != -1)
             {
-                if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance * 1.2f))
+                if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path, Distance * 1.2f))
                 {
                     c->Movement = true;
                 }
@@ -1320,7 +1320,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
     {
         if (SelectedCharacter != -1 && CheckAttack())
         {
-            if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
+            if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path, Distance))
             {
                 c->Movement = true;
                 c->MovementType = MOVEMENT_SKILL;
@@ -1338,7 +1338,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             return;
     }
 
-    bool Wall = CheckWall((c->PositionX), (c->PositionY), TargetX, TargetY);
+    bool Wall = CheckWall(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY);
     if (Wall)
     {
         if (SelectedCharacter != -1)
@@ -1358,14 +1358,14 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             case AT_SKILL_EVIL_SPIRIT_STR:
             case AT_SKILL_EVIL_SPIRIT_STR_MG:
             {
-                SendRequestMagicContinue(Skill, (c->PositionX), (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, &o->m_bySkillSerialNum);
+                SendRequestMagicContinue(Skill, GetCurrentTileX(c), GetCurrentTileY(c), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, &o->m_bySkillSerialNum);
                 SetPlayerMagic(c);
             }
             return;
             case AT_SKILL_FLASH:
             {
-                SendRequestMagicContinue(Skill, (c->PositionX),
-                    (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
+                SendRequestMagicContinue(Skill, GetCurrentTileX(c),
+                    GetCurrentTileY(c), (BYTE)(o->Angle[2] / 360.f * 256.f), 0, 0, 0xffff, 0);
                 SetAttackSpeed();
 
                 if (c->Helper.Type == MODEL_HORN_OF_FENRIR && !c->SafeZone)
@@ -1603,7 +1603,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
 
                 if (CheckTile(c, o, Distance) && c->SafeZone == false)
                 {
-                    bool bNoneWall = CheckWall((c->PositionX), (c->PositionY), TargetX, TargetY);
+                    bool bNoneWall = CheckWall(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY);
                     if (bNoneWall)
                     {
                         UseSkillSummon(c, o);
@@ -1611,7 +1611,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
                 }
                 else
                 {
-                    if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
+                    if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path, Distance))
                     {
                         c->Movement = true;
                     }
@@ -1634,11 +1634,11 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
             {
                 BYTE PathX[1];
                 BYTE PathY[1];
-                PathX[0] = (c->PositionX);
-                PathY[0] = (c->PositionY);
+                PathX[0] = GetCurrentTileX(c);
+                PathY[0] = GetCurrentTileY(c);
                 SendCharacterMove(c->Key, o->Angle[2], 1, &PathX[0], &PathY[0], TargetX, TargetY);
 
-                BYTE byValue = GetDestValue((c->PositionX), (c->PositionY), TargetX, TargetY);
+                BYTE byValue = GetDestValue(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY);
 
                 BYTE angle = (BYTE)((((o->Angle[2] + 180.f) / 360.f) * 255.f));
                 WORD TKey = 0xffff;
@@ -1646,8 +1646,8 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
                 {
                     TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
                 }
-                SendRequestMagicContinue(Skill, (c->PositionX),
-                    (c->PositionY), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
+                SendRequestMagicContinue(Skill, GetCurrentTileX(c),
+                    GetCurrentTileY(c), ((o->Angle[2] / 360.f) * 255), byValue, angle, TKey, 0);
                 SetAttackSpeed();
                 SetAction(o, PLAYER_SKILL_LIGHTNING_SHOCK);
                 c->Movement = 0;
@@ -1674,7 +1674,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
                 {
                     if (CheckTile(c, o, Distance) && c->SafeZone == false)
                     {
-                        bool bNoneWall = CheckWall((c->PositionX), (c->PositionY), TargetX, TargetY);
+                        bool bNoneWall = CheckWall(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY);
                         if (bNoneWall)
                         {
                             UseSkillSummon(c, o);
@@ -1682,7 +1682,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
                     }
                     else
                     {
-                        if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
+                        if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path, Distance))
                         {
                             c->Movement = true;
                         }
@@ -1718,7 +1718,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
                 {
                     if (CheckTile(c, o, Distance) && c->SafeZone == false)
                     {
-                        bool bNoneWall = CheckWall((c->PositionX), (c->PositionY), TargetX, TargetY);
+                        bool bNoneWall = CheckWall(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY);
                         if (bNoneWall)
                         {
                             UseSkillSummon(c, o);
@@ -1726,7 +1726,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
                     }
                     else
                     {
-                        if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
+                        if (PathFinding2(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY, &c->Path, Distance))
                         {
                             c->Movement = true;
                         }
@@ -1789,7 +1789,7 @@ void AttackCommon(CHARACTER* c, int Skill, float Distance)
 
                 int TargetX = (int)(c->TargetPosition[0] / TERRAIN_SCALE);
                 int TargetY = (int)(c->TargetPosition[1] / TERRAIN_SCALE);
-                BYTE byValue = GetDestValue((c->PositionX), (c->PositionY), TargetX, TargetY);
+                BYTE byValue = GetDestValue(GetCurrentTileX(c), GetCurrentTileY(c), TargetX, TargetY);
 
                 BYTE pos = CalcTargetPos(o->Position[0], o->Position[1], c->TargetPosition[0], c->TargetPosition[1]);
                 WORD TKey = 0xffff;
@@ -1797,7 +1797,7 @@ void AttackCommon(CHARACTER* c, int Skill, float Distance)
                 {
                     TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
                 }
-                SendRequestMagicContinue(Skill, (c->PositionX), (c->PositionY), (BYTE)(o->Angle[2] / 360.f * 256.f), byValue, pos, TKey, 0);
+                SendRequestMagicContinue(Skill, GetCurrentTileX(c), GetCurrentTileY(c), (BYTE)(o->Angle[2] / 360.f * 256.f), byValue, pos, TKey, 0);
                 SetAttackSpeed();
 
                 if (c->Helper.Type == MODEL_DARK_HORSE_ITEM && !c->SafeZone)
