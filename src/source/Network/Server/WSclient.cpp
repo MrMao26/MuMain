@@ -9335,7 +9335,10 @@ void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
         {
         case PURCHASEITEM_RESULTINFO::LackOfMoney:
         {
-            g_pSystemLogBox->AddText(I18N::Game::YouAreShortOfZen, SEASON3B::TYPE_ERROR_MESSAGE);
+            // Reached only from the personal shop purchase flow, which prices in
+            // MAO Coins. The server reuses PURC result 7 for an insufficient coin
+            // balance, so no new result code is needed -- only the wording changes.
+            g_pSystemLogBox->AddText(I18N::Game::YouAreShortOfMAOCoins, SEASON3B::TYPE_ERROR_MESSAGE);
         }
         break;
         case PURCHASEITEM_RESULTINFO::MoneyOverflowOrNotEnoughSpace:

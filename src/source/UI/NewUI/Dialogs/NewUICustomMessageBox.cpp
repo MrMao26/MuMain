@@ -4647,8 +4647,12 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
         return CALLBACK_CONTINUE;
     }
 
-    int iInputZen = _wtoi(strText);
-    if (iInputZen == 0)
+    // Personal shop prices are MAO Coins. SendPlayerShopSetItemPrice still carries
+    // a uint32_t, so no protocol change is needed; the practical ceiling is INT_MAX
+    // because the input box is parsed with _wtoi. A balance can exceed that (it is
+    // a 64-bit bigint) -- only a single item's asking price is bounded.
+    int iInputCoins = _wtoi(strText);
+    if (iInputCoins == 0)
     {
         return CALLBACK_CONTINUE;
     }
@@ -4665,16 +4669,11 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
         pItem = g_pMyShopInventory->FindItem(iSourceIndex);
     }
 
-    bool bResult = false;
-    if (pItem)
-    {
-        DWORD dwItemValue = ItemValue(pItem, 2);
-
-        if (iInputZen < (int)dwItemValue)
-        {
-            bResult = true;
-        }
-    }
+    // Always confirm the price. The old gate compared the entered price against
+    // ItemValue(pItem, 2), which is a Zen valuation -- meaningless against a coin
+    // price, and the personal shop no longer deals in Zen at all. Confirming
+    // unconditionally also means the seller always sees the price before it is sent.
+    const bool bResult = (pItem != NULL);
 
     if (bResult == true)
     {
@@ -4684,10 +4683,10 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
         if (lpMsgBox)
         {
             wchar_t strText2[MAX_TEXT_LENGTH] = { 0, };
-            mu_swprintf(strText2, I18N::Game::SellingPriceSZen, strText);
+            mu_swprintf(strText2, I18N::Game::SellingPriceSCoins, strText);
             lpMsgBox->AddMsg(strText2, RGBA(255, 0, 0, 255), MSGBOX_FONT_BOLD);
             lpMsgBox->AddMsg(I18N::Game::DoYouWantToSellItemAtThisPrice);
-            lpMsgBox->SetItemValue(iInputZen);
+            lpMsgBox->SetItemValue(iInputCoins);
         }
     }
     else
@@ -4710,30 +4709,30 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
 
             if (pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
             {
-                SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
+                SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputCoins);
 
                 SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
             }
             else if (pPickedItem->GetOwnerInventory() == nullptr)
             {
-                SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
+                SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputCoins);
 
                 SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
             }
             else if (pPickedItem->GetOwnerInventory() == g_pMyShopInventory->GetInventoryCtrl())
             {
-                SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
+                SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputCoins);
 
                 SendRequestEquipmentItem(STORAGE_TYPE::MYSHOP, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
             }
 
-            AddPersonalItemPrice(iTargetIndex, iInputZen, g_IsPurchaseShop);
+            AddPersonalItemPrice(iTargetIndex, iInputCoins, g_IsPurchaseShop);
         }
         else
         {
             iSourceIndex = g_pMyShopInventory->GetSourceIndex();
-            SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
-            AddPersonalItemPrice(iSourceIndex, iInputZen, g_IsPurchaseShop);
+            SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputCoins);
+            AddPersonalItemPrice(iSourceIndex, iInputCoins, g_IsPurchaseShop);
         }
     }
 

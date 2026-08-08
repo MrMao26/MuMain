@@ -337,14 +337,17 @@ inline bool GetPersonalItemPrice(int index, int& price, int type)
     return pPersonalItemTable->GetItemPrice(index, price);
 }
 
-inline bool CheckPriceIntegrity(const wchar_t* szZen, int size)
+// Rejects a price string carrying any non-ASCII byte. The personal shop prices
+// in MAO Coins rather than Zen, but the check is currency-agnostic: it only
+// guards the digits the input box produced.
+inline bool CheckPriceIntegrity(const wchar_t* szPrice, int size)
 {
     if (size > 255) return false;
     for (int i = 0; i < size; i++)
     {
-        if (szZen[i] == '\0')
+        if (szPrice[i] == '\0')
             break;
-        if (szZen[i] & 0x80)
+        if (szPrice[i] & 0x80)
         {
             return false;
         }

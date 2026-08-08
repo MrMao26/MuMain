@@ -2279,28 +2279,24 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
             if (GetPersonalItemPrice(indexInv, price, g_IsPurchaseShop))
             {
-                ConvertGold(price, Text);
-                mu_swprintf(TextList[TextNum], I18N::Game::SellingPriceS, Text);
+                // The personal shop trades in MAO Coins, never Zen. ConvertGold64
+                // rather than ConvertGold: the latter casts through DWORD and would
+                // wrap a large coin price.
+                ConvertGold64(price, Text);
+                mu_swprintf(TextList[TextNum], I18N::Game::SellingPriceSCoins, Text);
 
-                if (price >= 10000000)
-                    TextListColor[TextNum] = TEXT_COLOR_RED;
-                else if (price >= 1000000)
-                    TextListColor[TextNum] = TEXT_COLOR_YELLOW;
-                else if (price >= 100000)
-                    TextListColor[TextNum] = TEXT_COLOR_GREEN;
-                else
-                    TextListColor[TextNum] = TEXT_COLOR_WHITE;
+                // Fixed colour: the old thresholds (100k/1M/10M) are Zen magnitudes
+                // and would paint an ordinary coin price as alarming.
+                TextListColor[TextNum] = TEXT_COLOR_WHITE;
                 TextBold[TextNum] = true;
                 TextNum++;
                 mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
-                DWORD gold = CharacterMachine->Gold;
-
-                if ((int)gold < price && g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE)
+                if (CharacterMachine->MaoCoins < price && g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE)
                 {
                     TextListColor[TextNum] = TEXT_COLOR_RED;
                     TextBold[TextNum] = true;
-                    mu_swprintf(TextList[TextNum], I18N::Game::YouAreShortOfZen);
+                    mu_swprintf(TextList[TextNum], I18N::Game::YouAreShortOfMAOCoins);
                     TextNum++;
                     mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
                 }

@@ -606,6 +606,9 @@ namespace giPetManager
         int RequireLevel = 0;
         int RequireCharisma = 0;
         const std::wstring priceFormat = SanitizeWideStringFormat(I18N::Game::SellingPriceS);
+        // Separate format for the personal shop: it prices in MAO Coins, while the
+        // NPC shop above still quotes Zen and keeps using priceFormat.
+        const std::wstring coinPriceFormat = SanitizeWideStringFormat(I18N::Game::SellingPriceSCoins);
         const std::wstring ownershipFormat = SanitizeWideStringFormat(I18N::Game::CanBeEquippedByS);
 
         auto appendLine = [&](int color, bool bold, bool countForHeight, const wchar_t* format, auto... args)
@@ -648,29 +651,18 @@ namespace giPetManager
 
             if (GetPersonalItemPrice(indexInv, price, g_IsPurchaseShop))
             {
-                ConvertGold(price, textBuffer);
+                // MAO Coins, not Zen: ConvertGold64 avoids the DWORD cast inside
+                // ConvertGold, which would wrap a large coin price.
+                ConvertGold64(price, textBuffer);
 
-                int priceColor = TEXT_COLOR_WHITE;
-                if (price >= 10000000)
-                {
-                    priceColor = TEXT_COLOR_RED;
-                }
-                else if (price >= 1000000)
-                {
-                    priceColor = TEXT_COLOR_YELLOW;
-                }
-                else if (price >= 100000)
-                {
-                    priceColor = TEXT_COLOR_GREEN;
-                }
-
-                appendLine(priceColor, true, false, priceFormat.c_str(), textBuffer);
+                // Fixed colour: the old thresholds (100k/1M/10M) are Zen magnitudes
+                // and would paint an ordinary coin price as alarming.
+                appendLine(TEXT_COLOR_WHITE, true, false, coinPriceFormat.c_str(), textBuffer);
                 appendEmptyLine();
 
-                const auto heroGold = CharacterMachine->Gold;
-                if ((static_cast<std::int64_t>(heroGold) < static_cast<std::int64_t>(price)) && (g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE))
+                if ((CharacterMachine->MaoCoins < static_cast<std::int64_t>(price)) && (g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE))
                 {
-                    appendLine(TEXT_COLOR_RED, true, false, I18N::Game::YouAreShortOfZen);
+                    appendLine(TEXT_COLOR_RED, true, false, I18N::Game::YouAreShortOfMAOCoins);
                     appendEmptyLine();
                 }
             }

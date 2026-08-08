@@ -4245,6 +4245,15 @@
     <value>Sólo se puede hacer usando zen.</value>
     <comment>legacy_id=1135</comment>
   </data>
+  <data name="Selling Price: %s coins" xml:space="preserve">
+    <value>Precio de venta: %s coins</value>
+  </data>
+  <data name="You are short of MAO Coins." xml:space="preserve">
+    <value>No te alcanzan los MAO Coins.</value>
+  </data>
+  <data name="can only be done using MAO Coins." xml:space="preserve">
+    <value>Sólo se puede hacer usando MAO Coins.</value>
+  </data>
   <data name="/View store on" xml:space="preserve">
     <value>/Ver tienda en</value>
     <comment>legacy_id=1136</comment>
