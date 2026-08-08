@@ -2321,6 +2321,33 @@ typedef struct
 static_assert(sizeof(PBMSG_HEADER2) == 4, "C1HeaderWithSubCode must stay 4 bytes");
 static_assert(sizeof(PMSG_UPDATE_COIN_BALANCE) == 12, "UpdateCoinBalance must stay 12 bytes on the wire");
 
+//----------------------------------------------------------------------------
+// CG [0xE0][0x01] - CoinBalanceAck
+//
+// Client -> server acknowledgement of an UpdateCoinBalance push. Reusing
+// subcode 0x01 is deliberate: the client-to-server and server-to-client
+// dispatch tables are separate, so the pair (0xE0, 0x01) reads as
+// UpdateCoinBalance in one direction and CoinBalanceAck in the other without
+// colliding.
+//
+// Sent exactly once per push received, from ReceiveUpdateCoinBalance -- never
+// from a render or redraw path. The balance is drawn by a per-frame function
+// (CNewUIMyInventory::RenderInventoryDetails), so acking "whenever the balance
+// is displayed" would put one packet on the wire per rendered frame.
+//
+// The payload echoes the balance the client now displays so the server can
+// reconcile the two views. Raw bytes rather than an int64_t for the same reason
+// as the inbound push: the wire value is big-endian while the client is
+// little-endian, and a byte array stays independent of any #pragma pack.
+//----------------------------------------------------------------------------
+typedef struct
+{
+    PBMSG_HEADER2   h;
+    BYTE            Balance[8];     // int64, big-endian
+} PMSG_COIN_BALANCE_ACK, * LPPMSG_COIN_BALANCE_ACK;
+
+static_assert(sizeof(PMSG_COIN_BALANCE_ACK) == 12, "CoinBalanceAck must stay 12 bytes on the wire");
+
 typedef struct
 {
     PBMSG_HEADER2       m_Header;

@@ -13153,6 +13153,32 @@ void ReceiveDarkside(const BYTE* ReceiveBuffer)
     }
 }
 
+// (0xE0)(0x01) client -> server
+// Acknowledges one UpdateCoinBalance push, echoing the balance the client now
+// displays. Built by hand and written straight to the connection: the generated
+// PacketFunctions_ClientToServer header comes from the managed library's XML and
+// carries no 0xE0 sender, so this fork's packets go out through Connection::Send.
+static void SendCoinBalanceAck(int64_t balance)
+{
+    if (SocketClient == nullptr || !SocketClient->IsConnected())
+        return;
+
+    PMSG_COIN_BALANCE_ACK msg {};
+    msg.h.m_Header.Code = 0xC1;
+    msg.h.m_Header.Size = static_cast<BYTE>(sizeof(PMSG_COIN_BALANCE_ACK));
+    msg.h.m_Header.HeadCode = 0xE0;
+    msg.h.m_bySubCode = 0x01;
+
+    // Big-endian, mirroring the inbound push: most significant byte first. The
+    // shifts run on the unsigned value so a negative balance is well defined
+    // rather than leaning on signed right-shift behaviour.
+    const auto raw = static_cast<uint64_t>(balance);
+    for (int i = 0; i < 8; ++i)
+        msg.Balance[i] = static_cast<BYTE>((raw >> (56 - 8 * i)) & 0xFF);
+
+    SocketClient->Send(reinterpret_cast<const BYTE*>(&msg), sizeof(msg));
+}
+
 // (0xE0)(0x01)
 // Server push of the MAO Coin balance. Decoded byte by byte from big-endian:
 // accumulating into an unsigned value first keeps the shift well defined when
@@ -13168,6 +13194,11 @@ static bool ReceiveUpdateCoinBalance(const std::span<const BYTE> received_span)
         raw = (raw << 8) | Data->Balance[i];
 
     CharacterMachine->MaoCoins = static_cast<int64_t>(raw);
+
+    // Exactly one ack per push accepted -- including a push that repeats the
+    // current balance, since the server counts acks against pushes rather than
+    // against changes. A malformed packet returns above without acking.
+    SendCoinBalanceAck(CharacterMachine->MaoCoins);
     return true;
 }
 
