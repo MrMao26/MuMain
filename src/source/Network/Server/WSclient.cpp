@@ -851,6 +851,10 @@ void InitGame()
 
     CharacterMachine->StorageGold = 0;
     CharacterMachine->Gold = 0;
+    // Cleared like Gold: the server pushes the real balance on entering the
+    // game, and until it arrives we must not keep showing the previous
+    // character's coins.
+    CharacterMachine->MaoCoins = 0;
 
     g_shEventChipCount = 0;
     g_shMutoNumber[0] = -1;
@@ -13146,6 +13150,24 @@ void ReceiveDarkside(const BYTE* ReceiveBuffer)
     }
 }
 
+// (0xE0)(0x01)
+// Server push of the MAO Coin balance. Decoded byte by byte from big-endian:
+// accumulating into an unsigned value first keeps the shift well defined when
+// the top bit is set, and the final cast to int64_t matches the server bigint.
+static bool ReceiveUpdateCoinBalance(const std::span<const BYTE> received_span)
+{
+    auto* Data = safe_cast<PMSG_UPDATE_COIN_BALANCE>(received_span, "PMSG_UPDATE_COIN_BALANCE");
+    if (Data == nullptr)
+        return false;
+
+    uint64_t raw = 0;
+    for (int i = 0; i < 8; ++i)
+        raw = (raw << 8) | Data->Balance[i];
+
+    CharacterMachine->MaoCoins = static_cast<int64_t>(raw);
+    return true;
+}
+
 static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
 {
     auto received_span = std::span<const BYTE>(ReceiveBuffer, Size);
@@ -14563,6 +14585,27 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
         {
         case 0x00: ReceiveCharacterCard_New(ReceiveBuffer);
             break;
+        }
+    }
+    break;
+
+    // 0xE0 is this fork's reserved packet namespace. An unrecognised subcode is
+    // dropped in silence on purpose: the server rolls out new 0xE0 packets over
+    // time (VIP status is the next one), and a client older than the server has
+    // to stay quiet rather than log noise or drop the connection.
+    case 0xE0:
+    {
+        auto* Header = safe_cast<PBMSG_HEADER2>(received_span, "PBMSG_HEADER2 (0xE0)");
+        if (Header == nullptr)
+            break;
+
+        switch (Header->m_bySubCode)
+        {
+        case 0x01:
+            ReceiveUpdateCoinBalance(received_span);
+            break;
+        default:
+            break;      // reserved for future fork packets -- ignore silently
         }
     }
     break;

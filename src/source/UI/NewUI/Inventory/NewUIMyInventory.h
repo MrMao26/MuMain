@@ -65,7 +65,17 @@ namespace SEASON3B
         };
 
         static constexpr float INVENTORY_WIDTH  = 190.0f;
-        static constexpr float INVENTORY_HEIGHT = 429.0f;
+        // 429 + 26 for the MAO Coin row below the Zen plate. The window is
+        // always placed at y = 0, so growing downwards stays on screen.
+        static constexpr float INVENTORY_HEIGHT = 455.0f;
+        // Zen plate sits at y+364 (26 tall); the coin row follows it, and the
+        // button strip moves down by the same amount.
+        static constexpr float COIN_ROW_Y   = 390.0f;
+        static constexpr float BUTTON_ROW_Y = 417.0f;
+        // The background art is still drawn at its native height. Stretching it
+        // to the taller window would shift the grid painted into the texture out
+        // of line with the item slots; the bottom panel covers the difference.
+        static constexpr float BACKGROUND_HEIGHT = 429.0f;
 
         typedef struct tagEQUIPMENT_ITEM
         {

@@ -2491,6 +2491,7 @@ void CHARACTER_MACHINE::Init()
         Equipment[i].Type = -1;
     }
     Gold = 0;
+    MaoCoins = 0;
     StorageGold = 0;
     PacketSerial = 0;
     InfinityArrowAdditionalMana = 0;

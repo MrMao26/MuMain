@@ -2297,6 +2297,30 @@ typedef struct
     INT                 m_iUnitPrice;
 }PRECEIVE_CASTLE_HUNTZONE_INFO, * LPPRECEIVE_CASTLE_HUNTZONE_INFO;
 
+//----------------------------------------------------------------------------
+// GC [0xE0][0x01] - UpdateCoinBalance
+//
+// 0xE0 is this fork's reserved packet namespace. Server -> client only; there
+// is no client-side request, the server pushes on login, after a purchase (to
+// both buyer and seller) and when the panel credits a connected account.
+//
+// Balance is kept as raw bytes rather than an int64_t on purpose: the wire
+// value is big-endian while the client is little-endian, so it has to be
+// decoded explicitly, and a byte array keeps the struct layout independent of
+// whatever #pragma pack is in effect.
+//----------------------------------------------------------------------------
+typedef struct
+{
+    PBMSG_HEADER2   h;
+    BYTE            Balance[8];     // int64, big-endian
+} PMSG_UPDATE_COIN_BALANCE, * LPPMSG_UPDATE_COIN_BALANCE;
+
+// The wire format is fixed: C1HeaderWithSubCode (4) + Balance (8). Pin it so a
+// future packing or header change fails the build instead of silently
+// misreading the balance off the socket.
+static_assert(sizeof(PBMSG_HEADER2) == 4, "C1HeaderWithSubCode must stay 4 bytes");
+static_assert(sizeof(PMSG_UPDATE_COIN_BALANCE) == 12, "UpdateCoinBalance must stay 12 bytes on the wire");
+
 typedef struct
 {
     PBMSG_HEADER2       m_Header;

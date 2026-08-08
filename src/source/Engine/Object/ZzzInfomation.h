@@ -53,6 +53,10 @@ public:
     CHARACTER_ATTRIBUTE Character;
     ITEM				Equipment[MAX_EQUIPMENT];
     DWORD				Gold;
+    // MAO Coins. Pushed by the server via GC [0xE0][0x01] UpdateCoinBalance;
+    // the client never computes it. 64-bit because the server stores it as a
+    // bigint -- narrowing this to 32 bits would silently wrap large balances.
+    int64_t             MaoCoins;
     int                 StorageGold;
     MONSTER             Enemy;
     //output

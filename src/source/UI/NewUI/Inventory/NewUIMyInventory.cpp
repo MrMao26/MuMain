@@ -418,10 +418,10 @@ void CNewUIMyInventory::SetPos(int x, int y)
     SetEquipmentSlotInfo();
 
     m_pNewInventoryCtrl->SetPos(x + 15, y + 200);
-    m_BtnExit.SetPos(m_Pos.x + 13, m_Pos.y + 391);
-    m_BtnRepair.SetPos(m_Pos.x + 50, m_Pos.y + 391);
-    m_BtnMyShop.SetPos(m_Pos.x + 87, m_Pos.y + 391);
-    m_BtnExpand.SetPos(m_Pos.x + 87 + 37, m_Pos.y + 391);
+    m_BtnExit.SetPos(m_Pos.x + 13, m_Pos.y + BUTTON_ROW_Y);
+    m_BtnRepair.SetPos(m_Pos.x + 50, m_Pos.y + BUTTON_ROW_Y);
+    m_BtnMyShop.SetPos(m_Pos.x + 87, m_Pos.y + BUTTON_ROW_Y);
+    m_BtnExpand.SetPos(m_Pos.x + 87 + 37, m_Pos.y + BUTTON_ROW_Y);
 }
 
 const POINT& CNewUIMyInventory::GetPos() const
@@ -1189,19 +1189,19 @@ void CNewUIMyInventory::SetEquipmentSlotInfo()
 void CNewUIMyInventory::SetButtonInfo()
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
+    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + BUTTON_ROW_Y, 36, 29);
     m_BtnExit.ChangeToolTipText(&I18N::Game::CloseIV, true);
 
     m_BtnRepair.ChangeButtonImgState(true, IMAGE_INVENTORY_REPAIR_BTN, false);
-    m_BtnRepair.ChangeButtonInfo(m_Pos.x + 50, m_Pos.y + 391, 36, 29);
+    m_BtnRepair.ChangeButtonInfo(m_Pos.x + 50, m_Pos.y + BUTTON_ROW_Y, 36, 29);
     m_BtnRepair.ChangeToolTipText(&I18N::Game::RepairL, true);
 
     m_BtnMyShop.ChangeButtonImgState(true, IMAGE_INVENTORY_MYSHOP_OPEN_BTN, false);
-    m_BtnMyShop.ChangeButtonInfo(m_Pos.x + 87, m_Pos.y + 391, 36, 29);
+    m_BtnMyShop.ChangeButtonInfo(m_Pos.x + 87, m_Pos.y + BUTTON_ROW_Y, 36, 29);
     m_BtnMyShop.ChangeToolTipText(&I18N::Game::OpenPersonalStoreS, true);
 
     m_BtnExpand.ChangeButtonImgState(true, IMAGE_INVENTORY_EXPAND_BTN, false);
-    m_BtnExpand.ChangeButtonInfo(m_Pos.x + 87 + 37, m_Pos.y + 391, 36, 29);
+    m_BtnExpand.ChangeButtonInfo(m_Pos.x + 87 + 37, m_Pos.y + BUTTON_ROW_Y, 36, 29);
     m_BtnExpand.ChangeToolTipText(&I18N::Game::OpenExpandedInventoryK, true);
 }
 
@@ -1264,10 +1264,12 @@ void CNewUIMyInventory::RenderFrame() const
     const auto x = static_cast<float>(m_Pos.x);
     const auto y = static_cast<float>(m_Pos.y);
 
-    RenderImage(IMAGE_INVENTORY_BACK, x, y, INVENTORY_WIDTH, INVENTORY_HEIGHT);
+    RenderImage(IMAGE_INVENTORY_BACK, x, y, INVENTORY_WIDTH, BACKGROUND_HEIGHT);
     RenderImage(IMAGE_INVENTORY_BACK_TOP2, x, y, 190.f, 64.f);
-    RenderImage(IMAGE_INVENTORY_BACK_LEFT, x, y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_INVENTORY_BACK_RIGHT, x + INVENTORY_WIDTH - 21, y + 64, 21.f, 320.f);
+    // 346 = 320 + the 26px the window grew for the coin row, so the side edges
+    // still meet the bottom panel (anchored at INVENTORY_HEIGHT - 45).
+    RenderImage(IMAGE_INVENTORY_BACK_LEFT, x, y + 64, 21.f, 346.f);
+    RenderImage(IMAGE_INVENTORY_BACK_RIGHT, x + INVENTORY_WIDTH - 21, y + 64, 21.f, 346.f);
     RenderImage(IMAGE_INVENTORY_BACK_BOTTOM, x, y + INVENTORY_HEIGHT - 45, 190.f, 45.f);
 }
 
@@ -1397,6 +1399,24 @@ void CNewUIMyInventory::RenderInventoryDetails() const
 
     g_pRenderText->SetTextColor(getGoldColor(dwZen));
     g_pRenderText->RenderText((int)m_Pos.x + 50, (int)m_Pos.y + 371, Text);
+
+    // MAO Coins. PLACEHOLDER ART: this reuses the Zen plate tinted cyan so the
+    // row is distinguishable while the real coin asset does not exist yet.
+    // Swap the image id and drop the tint once it does.
+    // The value is pushed by the server (GC [0xE0][0x01]); it stays 0 until the
+    // first push arrives, which is expected rather than a bug.
+    RenderImage(IMAGE_INVENTORY_MONEY, m_Pos.x + 11, m_Pos.y + COIN_ROW_Y, 170.f, 26.f,
+                0.f, 0.f, RGBA(90, 210, 255, 255));
+
+    wchar_t CoinText[256] = { 0, };
+    // ConvertGold64 rather than ConvertGold: the balance is a 64-bit bigint and
+    // the 32-bit formatter would wrap large values.
+    ConvertGold64(CharacterMachine->MaoCoins, CoinText);
+
+    // Fixed colour: getGoldColor's thresholds are Zen amounts and would tell a
+    // misleading story about a coin balance.
+    g_pRenderText->SetTextColor(160, 235, 255, 255);
+    g_pRenderText->RenderText((int)m_Pos.x + 50, (int)m_Pos.y + COIN_ROW_Y + 7, CoinText);
 
     g_pRenderText->SetFont(g_hFont);
 
