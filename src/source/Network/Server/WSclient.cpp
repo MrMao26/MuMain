@@ -5625,6 +5625,16 @@ BOOL ReceiveDieExp(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     Key &= 0x7FFF;
 
     int Index = FindCharacterIndex(Key);
+    if (Index == MAX_CHARACTERS_CLIENT)
+    {
+        // The key is not in the viewport: the death belongs to somebody the
+        // client cannot see. Without this the sentinel slot past the end of the
+        // live range gets marked dead, and the next character to be created
+        // there inherits it -- appearing, fading out and vanishing for no reason.
+        // The packet itself was consumed fine, hence the success return.
+        return (TRUE);
+    }
+
     CHARACTER* c = &CharactersClient[Index];
     OBJECT* o = &c->Object;
     vec3_t Light;
@@ -5703,6 +5713,12 @@ BOOL ReceiveDieExpLarge(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     auto killerId = Data->KillerObjectId;
 
     int Index = FindCharacterIndex(killedId);
+    if (Index == MAX_CHARACTERS_CLIENT)
+    {
+        // Killed somebody outside the viewport -- nothing local to update.
+        return (TRUE);
+    }
+
     CHARACTER* killedObject = &CharactersClient[Index];
     OBJECT* o = &killedObject->Object;
     vec3_t Light;
@@ -5850,6 +5866,14 @@ void ReceiveDie(const BYTE* ReceiveBuffer, int Size)
     int Key = ((int)(Data->KeyH) << 8) + Data->KeyL;
 
     int Index = FindCharacterIndex(Key);
+    if (Index == MAX_CHARACTERS_CLIENT)
+    {
+        // Death for a key the client is not tracking. Falling through would mark
+        // the sentinel slot dead and leave it that way for whoever lands there
+        // next: DeadCharacter would then fade the newcomer out and clear its
+        // Live flag, which reads on screen as a player who simply is not there.
+        return;
+    }
 
     CHARACTER* c = &CharactersClient[Index];
     OBJECT* o = &c->Object;
