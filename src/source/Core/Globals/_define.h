@@ -489,6 +489,15 @@ constexpr int ITEM_GROUP_ETC = 15;
 #define CTLCODE_08OPERATOR			0x08
 #define CTLCODE_10ACCOUNT_BLOCKITEM	0x10
 #define CTLCODE_20OPERATOR			0x20
+// Set by the server on the viewport appearance data, so every observer sees the
+// badge and not only the VIP themselves. A CtlCode bit rather than a dedicated
+// packet because CtlCode already travels per character in the viewport. It is
+// deliberately not delivered to the character selection screen: VIP shows
+// in-world only.
+//
+// Test these bits with `&`, never `==`: a character can now carry two of them
+// at once (a VIP operator is 0x60), and an equality check silently drops both.
+#define CTLCODE_40VIP				0x40
 
 #define PVP_HERO2		1
 #define PVP_HERO1		2

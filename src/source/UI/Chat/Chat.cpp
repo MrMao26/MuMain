@@ -73,6 +73,38 @@ typedef struct
 
 CHAT Chat[MAX_CHAT];
 
+// The VIP badge drawn ahead of the name, on the same line -- same two-segment
+// technique the personal shop title uses above. Bold and gold. The trailing
+// space is part of the string so the gap before the name needs no separate
+// arithmetic, which would otherwise have to be converted between the device
+// pixels GetTextExtentPoint32 reports and the scaled space the renderer uses.
+constexpr const wchar_t* kVipTag = L"[VIP] ";
+
+bool IsVipCharacter(const CHARACTER* c)
+{
+    return c != nullptr && (c->CtlCode & CTLCODE_40VIP) != 0;
+}
+
+// Badge width in device pixels, or 0 when the character is not VIP. Measured
+// with the bold font because that is what renders it.
+//
+// Only for SetBooleanPosition, which measures every line this way and divides
+// the total by g_fScreenRate_x at the end. The render path must NOT use this:
+// there, positions are already in the scaled space, so it takes the width
+// RenderText reports instead.
+int VipTagWidth(const CHARACTER* c)
+{
+    if (!IsVipCharacter(c))
+        return 0;
+
+    SIZE size = { 0, 0 };
+    g_pRenderText->SetFont(g_hFontBold);
+    const BOOL ok = GetTextExtentPoint32(g_pRenderText->GetFontDC(), kVipTag, lstrlen(kVipTag), &size);
+    g_pRenderText->SetFont(g_hFont);
+
+    return ok ? size.cx : 0;
+}
+
 void SetBooleanPosition(CHAT* c)
 {
     BOOL bResult[5];
@@ -96,6 +128,11 @@ void SetBooleanPosition(CHAT* c)
     bResult[4] = GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Guild, lstrlen(c->Guild), &Size[4]);
 
     Size[0].cx += 3;
+    // The badge shares the name's line, so it widens that line rather than
+    // adding one of its own (unlike the shop title below, which gets its own
+    // row and so also adds height). Without this the name would be clipped and
+    // the hover hit test, which reads c->Width, would be short by the badge.
+    Size[0].cx += VipTagWidth(c->Owner);
 
     if (c->LifeTime[1] > 0)
         c->Width = std::max<int>(std::max<int>(std::max<int>(Size[0].cx, Size[1].cx), std::max<int>(Size[2].cx, Size[3].cx)), Size[4].cx);
@@ -268,6 +305,14 @@ void RenderBoolean(int x, int y, CHAT* c)
     {
         g_pRenderText->SetTextColor(100, 250, 250, 255);
     }
+    else if (IsVipCharacter(c->Owner) && c->Color < 4)
+    {
+        // Gold, but only over the cool "safe" PK tiers (0-3). PK 4+ keeps its
+        // orange/red warning: that colour tells the player something about
+        // their safety, and a cosmetic badge must not paint over it. GM is
+        // handled above for the same reason -- authority outranks decoration.
+        g_pRenderText->SetTextColor(255, 215, 0, 255);
+    }
     else
     {
         SetPlayerColor(c->Color);
@@ -281,6 +326,32 @@ void RenderBoolean(int x, int y, CHAT* c)
         unsigned int Temp = g_pRenderText->GetBgColor();
         g_pRenderText->SetBgColor(g_pRenderText->GetTextColor());
         g_pRenderText->SetTextColor(Temp);
+    }
+
+    // The badge goes ahead of the name on the same line, advancing x exactly the
+    // way the shop title block above does -- with the width RenderText reports,
+    // not the one GetTextExtentPoint32 gives. RenderPos and RenderBoxSize are in
+    // the scaled reference space (see iLineHeight, and the /g_fScreenRate_x that
+    // SetBooleanPosition applies to c->Width), while GetTextExtentPoint32 returns
+    // device pixels; advancing by the latter overshoots by the screen rate and
+    // drives the name's remaining width to zero, dropping it entirely.
+    //
+    // Drawn after the hover inversion and with the name's colour restored
+    // afterwards: the badge is an identity marker rather than selectable text,
+    // so it keeps its gold while the name flips on hover.
+    if (IsVipCharacter(c->Owner))
+    {
+        const unsigned int dwNameColor = g_pRenderText->GetTextColor();
+        SIZE TagSize = { 0, 0 };
+
+        g_pRenderText->SetFont(g_hFontBold);
+        g_pRenderText->SetTextColor(255, 215, 0, 255);
+        g_pRenderText->RenderText(RenderPos.x, RenderPos.y, kVipTag, 0, iLineHeight, RT3_SORT_LEFT, &TagSize);
+        g_pRenderText->SetFont(g_hFont);
+
+        g_pRenderText->SetTextColor(dwNameColor);
+        RenderPos.x += TagSize.cx;
+        RenderBoxSize.cx -= TagSize.cx;   // c->Width already includes the badge
     }
 
     if (bGmMode)
