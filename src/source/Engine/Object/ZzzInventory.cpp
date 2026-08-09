@@ -7602,7 +7602,7 @@ bool IsTradeBan(ITEM* pItem)
     if (pItem->Type == ITEM_GM_GIFT)
     {
         if (g_isCharacterBuff((&Hero->Object), eBuff_GMEffect) ||
-            (Hero->CtlCode == CTLCODE_20OPERATOR) || (Hero->CtlCode == CTLCODE_08OPERATOR))
+            (Hero->CtlCode & (CTLCODE_20OPERATOR | CTLCODE_08OPERATOR)))
             return false;
         else
             return true;

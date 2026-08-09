@@ -28,7 +28,7 @@ constexpr float kDefaultVelocity = 0.5f;
 bool ShouldAssignWebzenPart(CHARACTER& character)
 {
     const bool hasGmBuff = g_isCharacterBuff((&character.Object), eBuff_GMEffect) != FALSE;
-    const bool isOperator = (character.CtlCode == CTLCODE_20OPERATOR) || (character.CtlCode == CTLCODE_08OPERATOR);
+    const bool isOperator = (character.CtlCode & (CTLCODE_20OPERATOR | CTLCODE_08OPERATOR)) != 0;
     return hasGmBuff || isOperator;
 }
 

@@ -1812,7 +1812,7 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
             {
                 CHARACTER* c = &CharactersClient[i];
                 OBJECT* o = &c->Object;
-                if (o->Live && o->Kind == KIND_PLAYER && (g_isCharacterBuff((&c->Object), eBuff_GMEffect) || (c->CtlCode == CTLCODE_20OPERATOR) || (c->CtlCode == CTLCODE_08OPERATOR)))
+                if (o->Live && o->Kind == KIND_PLAYER && (g_isCharacterBuff((&c->Object), eBuff_GMEffect) || (c->CtlCode & (CTLCODE_20OPERATOR | CTLCODE_08OPERATOR))))
                 {
                     if (wcscmp(c->ID, ID) == 0)
                     {
@@ -1838,7 +1838,7 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
             {
                 CHARACTER* c = &CharactersClient[i];
                 OBJECT* o = &c->Object;
-                if (o->Live && o->Kind == KIND_PLAYER && g_isCharacterBuff((&c->Object), eBuff_GMEffect) || (c->CtlCode == CTLCODE_20OPERATOR) || (c->CtlCode == CTLCODE_08OPERATOR))
+                if (o->Live && o->Kind == KIND_PLAYER && (g_isCharacterBuff((&c->Object), eBuff_GMEffect) || (c->CtlCode & (CTLCODE_20OPERATOR | CTLCODE_08OPERATOR))))
                 {
                     if (wcscmp(c->ID, ID) == 0)
                     {

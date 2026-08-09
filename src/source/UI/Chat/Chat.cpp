@@ -79,7 +79,7 @@ void SetBooleanPosition(CHAT* c)
     SIZE Size[5];
     memset(&Size[0], 0, sizeof(SIZE) * 5);
 
-    if (g_isCharacterBuff((&c->Owner->Object), eBuff_GMEffect) || (c->Owner->CtlCode == CTLCODE_20OPERATOR) || (c->Owner->CtlCode == CTLCODE_08OPERATOR))
+    if (g_isCharacterBuff((&c->Owner->Object), eBuff_GMEffect) || (c->Owner->CtlCode & (CTLCODE_20OPERATOR | CTLCODE_08OPERATOR)))
     {
         g_pRenderText->SetFont(g_hFontBold);
         bResult[0] = GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->ID, lstrlen(c->ID), &Size[0]);
@@ -230,7 +230,7 @@ void RenderBoolean(int x, int y, CHAT* c)
 
     bool bGmMode = false;
 
-    if (g_isCharacterBuff((&c->Owner->Object), eBuff_GMEffect) || (c->Owner->CtlCode == CTLCODE_20OPERATOR) || (c->Owner->CtlCode == CTLCODE_08OPERATOR))
+    if (g_isCharacterBuff((&c->Owner->Object), eBuff_GMEffect) || (c->Owner->CtlCode & (CTLCODE_20OPERATOR | CTLCODE_08OPERATOR)))
     {
         bGmMode = true;
         g_pRenderText->SetBgColor(30, 30, 30, 200);
