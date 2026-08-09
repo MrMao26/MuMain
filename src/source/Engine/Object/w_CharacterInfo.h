@@ -132,6 +132,13 @@ public:
     CLASS_SKIN_INDEX            SkinIndex;
     BYTE			Skin; // What is this good for?
     BYTE			CtlCode;
+    // Status byte from the appearance block of the viewport packet (0x12), the
+    // only place a remote player's flags arrive -- CtlCode is filled in from the
+    // character list and the join-map packet, so it stays zero for everyone but
+    // the hero. Kept separate rather than merged into CtlCode because the two
+    // bytes are different vocabularies: 0x10 means an account item block in
+    // CtlCode but ExtendState here.
+    BYTE			ViewportStatus;
     BYTE			ExtendState;
     BYTE			EtcPart;
     BYTE		GuildStatus;

@@ -80,9 +80,20 @@ CHAT Chat[MAX_CHAT];
 // pixels GetTextExtentPoint32 reports and the scaled space the renderer uses.
 constexpr const wchar_t* kVipTag = L"[VIP] ";
 
+// Two independent sources, kept apart rather than OR-ed into one field because
+// the bytes are different vocabularies that only happen to agree on this bit:
+//   CtlCode        arrives in the join-map packet (0xF3/0x03) and so is set for
+//                  the hero alone; its 0x10 marks an account item block.
+//   ViewportStatus is byte 27 of the appearance block in 0x12, the only channel
+//                  that carries flags for remote players; its 0x10 is
+//                  ExtendState and its 0x20 also drives PARTS_LION.
 bool IsVipCharacter(const CHARACTER* c)
 {
-    return c != nullptr && (c->CtlCode & CTLCODE_40VIP) != 0;
+    if (c == nullptr)
+        return false;
+
+    return ((c->CtlCode & CTLCODE_40VIP) != 0)
+        || ((c->ViewportStatus & VIEWPORT_STATUS_VIP) != 0);
 }
 
 // Badge width in device pixels, or 0 when the character is not VIP. Measured

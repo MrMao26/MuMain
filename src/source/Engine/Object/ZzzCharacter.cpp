@@ -11689,6 +11689,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     o->m_bySkillCount = 0;
     c->NotRotateOnMagicHit = false;
     c->CtlCode = 0;
+    c->ViewportStatus = 0;
     c->m_CursedTempleCurSkill = AT_SKILL_CURSED_TEMPLE_PRODECTION;
     c->m_CursedTempleCurSkillPacket = false;
     c->HealthStatus = -1;
@@ -15049,6 +15050,7 @@ CHARACTER* CreateHero(int Index, CLASS_TYPE Class, int Skin, float x, float y, f
     UnRegisterBuff(eBuff_GMEffect, o);
 
     c->CtlCode = 0;
+    c->ViewportStatus = 0;
     SetCharacterScale(c);
     SetPlayerStop(c);
     return c;

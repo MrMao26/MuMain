@@ -499,6 +499,13 @@ constexpr int ITEM_GROUP_ETC = 15;
 // at once (a VIP operator is 0x60), and an equality check silently drops both.
 #define CTLCODE_40VIP				0x40
 
+// Bits of the status byte inside the appearance block of the viewport packet
+// (0x12). A DIFFERENT vocabulary from CTLCODE_* above even though 0x20 and 0x40
+// happen to line up: here 0x07 is the pose, 0x10 is ExtendState and 0x20 is
+// also read as PARTS_LION by ReadEquipmentExtended. Only 0x40 is unambiguous,
+// which is why this is the one bit read from here.
+#define VIEWPORT_STATUS_VIP			0x40
+
 #define PVP_HERO2		1
 #define PVP_HERO1		2
 #define PVP_NEUTRAL		3

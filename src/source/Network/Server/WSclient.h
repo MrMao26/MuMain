@@ -528,6 +528,17 @@ typedef struct {
     BYTE         s_BuffCount;
 } PCREATE_CHARACTER_EXTENDED, * LPPCREATE_CHARACTER_EXTENDED;
 
+// This struct is deliberately NOT inside a #pragma pack(1) region -- the last
+// pop is well above it -- so natural alignment inserts one padding byte before
+// AttackSpeed, and that byte is load-bearing: it is what puts Class at 26,
+// Flags at 27 and Equipment at 28 to match the wire. Reading the layout by eye
+// gets this wrong, so pin it here: packing this struct, or adding a field ahead
+// of Class, must fail the build rather than silently shift every field that
+// follows and misread the socket.
+static_assert(offsetof(PCREATE_CHARACTER_EXTENDED, Class) == 26, "0x12 Class must stay at offset 26");
+static_assert(offsetof(PCREATE_CHARACTER_EXTENDED, Flags) == 27, "0x12 status byte must stay at offset 27");
+static_assert(offsetof(PCREATE_CHARACTER_EXTENDED, Equipment) == 28, "0x12 Equipment must stay at offset 28");
+
 //receive other map character
 typedef struct
 {

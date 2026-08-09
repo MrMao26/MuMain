@@ -2590,6 +2590,13 @@ void ReceiveCreatePlayerViewportExtended(std::span<const BYTE> ReceiveBuffer)
         CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 8, o, 20.f);
     }
 
+    // Byte 27 of the packet, the status byte of the appearance block. This is
+    // the only channel that carries a remote player's flags: CtlCode is filled
+    // from the character list and the join-map packet, so it stays zero for
+    // everyone except the hero. Stored whole rather than as a single bit so a
+    // future flag in the same byte needs no second plumbing job.
+    c->ViewportStatus = Data->Flags;
+
     int Index = FindCharacterIndex(Key);
     ReadEquipmentExtended(Index, Data->Flags, Data->Equipment);
 
@@ -2668,6 +2675,7 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
         BYTE byBackUpGuildMasterKillCount = 0;
         BYTE byEtcPart = 0;
         BYTE byBackupCtlcode = 0;
+        BYTE byBackupViewportStatus = 0;
 
         if (iIndex != MAX_CHARACTERS_CLIENT)
         {
@@ -2678,6 +2686,10 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
             byBackUpGuildMasterKillCount = pCha->GuildMasterKillCount;
             byEtcPart = pCha->EtcPart;
             byBackupCtlcode = pCha->CtlCode;
+            // Carried across the re-create for the same reason as CtlCode: this
+            // packet does not resend the appearance status, so a transformed VIP
+            // would otherwise lose the badge until it re-entered the viewport.
+            byBackupViewportStatus = pCha->ViewportStatus;
         }
 
         if (FindText(characterName, L"webzen") == false)
@@ -2713,6 +2725,7 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
             c->GuildMasterKillCount = byBackUpGuildMasterKillCount;
             c->EtcPart = byEtcPart;
             c->CtlCode = byBackupCtlcode;
+            c->ViewportStatus = byBackupViewportStatus;
             c->Class = Class;
             c->SkinIndex = gCharacterManager.GetSkinModelIndex(c->Class);
             c->PK = Data2->Path & 0xf;

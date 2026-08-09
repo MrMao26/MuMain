@@ -36,6 +36,7 @@ void CHARACTER::Initialize()
     Class = CLASS_WIZARD;
     Skin = 0;
     CtlCode = 0;
+    ViewportStatus = 0;
     ExtendState = 0;
     EtcPart = 0;
     GuildStatus = 0;
