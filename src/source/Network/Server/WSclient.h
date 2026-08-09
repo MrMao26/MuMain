@@ -2775,7 +2775,17 @@ typedef struct
 
 //----------------------------------------------------------------------------
 // GC [0xBF][0x01]
+//
+// Both structs are packed because both are used as wire lengths: the reader
+// walks the trailing party array with `Offset += sizeof(...)`. Under natural
+// alignment the party entry's leading WORD rounds its size up to 6 while the
+// wire carries 5, so every entry after the first was read one byte further
+// along than it actually sits -- the first party member decoded correctly and
+// the rest came out as garbage. The state struct happened to need no padding,
+// but it is pinned the same way so that adding a field cannot silently
+// reintroduce the same gap.
 //----------------------------------------------------------------------------
+#pragma pack(push, 1)
 typedef struct
 {
     PBMSG_HEADER2	h;
@@ -2797,6 +2807,22 @@ typedef struct
     BYTE		btX;
     BYTE		btY;
 } PMSG_CURSED_TAMPLE_PARTY_POS, * LPPMSG_CURSED_TAMPLE_PARTY_POS;
+#pragma pack(pop)
+
+// The reader treats sizeof as the wire length for both of these, so pin the
+// whole layout: an offset that moves, or a size that stops matching the wire,
+// must fail the build rather than quietly shift every field that follows.
+static_assert(offsetof(PMSG_CURSED_TAMPLE_STATE, wRemainSec) == 4, "0xBF/01 RemainingSeconds must stay at 4");
+static_assert(offsetof(PMSG_CURSED_TAMPLE_STATE, btUserIndex) == 6, "0xBF/01 PlayerIndex must stay at 6");
+static_assert(offsetof(PMSG_CURSED_TAMPLE_STATE, btX) == 8, "0xBF/01 X must stay at 8");
+static_assert(offsetof(PMSG_CURSED_TAMPLE_STATE, btPartyCount) == 13, "0xBF/01 PartyCount must stay at 13");
+static_assert(sizeof(PMSG_CURSED_TAMPLE_STATE) == 14, "0xBF/01 state must stay 14 bytes on the wire");
+
+static_assert(offsetof(PMSG_CURSED_TAMPLE_PARTY_POS, wPartyUserIndex) == 0, "party entry index at 0");
+static_assert(offsetof(PMSG_CURSED_TAMPLE_PARTY_POS, byMapNumber) == 2, "party entry MapNumber at 2 (a byte, not a short)");
+static_assert(offsetof(PMSG_CURSED_TAMPLE_PARTY_POS, btX) == 3, "party entry X at 3");
+static_assert(offsetof(PMSG_CURSED_TAMPLE_PARTY_POS, btY) == 4, "party entry Y at 4");
+static_assert(sizeof(PMSG_CURSED_TAMPLE_PARTY_POS) == 5, "party entry must stay 5 bytes -- it is used as the array stride");
 
 //----------------------------------------------------------------------------
 // CG [0xBF][0x02]
