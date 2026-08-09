@@ -238,6 +238,29 @@ target_link_libraries(Main PRIVATE MuClient::MuClient)
 if (NOT MSVC)
   set(MU_MAIN_MAP_FILE "${CMAKE_CURRENT_BINARY_DIR}/Main.map")
   target_link_options(Main PRIVATE "-Wl,-Map,${MU_MAIN_MAP_FILE}")
+else()
+  # Symbols for the optimised build, so the faulting offset in a crash dump can
+  # be resolved to a function name. Release ships without them, which is why a
+  # crash that reproduces on every build all day still has no name attached.
+  #
+  # /Z7 rather than /Zi: it embeds the debug records in each .obj, so a parallel
+  # ninja build has no single .pdb to contend over (/Zi needs /FS and still
+  # serialises), and the static library carries its symbols into the final link.
+  #
+  # /DEBUG by itself silently turns OFF /OPT:REF and /OPT:ICF, which would
+  # change code layout and inlining; both are restored so the optimised code
+  # stays the code we are trying to diagnose.
+  #
+  # /MAP is the part that makes this self-service: a plain text listing of every
+  # symbol and its address, so an offset can be looked up without a debugger.
+  target_compile_options(MuClient PRIVATE $<$<CONFIG:Release>:/Z7>)
+  target_compile_options(Main PRIVATE $<$<CONFIG:Release>:/Z7>)
+  target_link_options(Main PRIVATE
+    $<$<CONFIG:Release>:/DEBUG>
+    $<$<CONFIG:Release>:/OPT:REF>
+    $<$<CONFIG:Release>:/OPT:ICF>
+    "$<$<CONFIG:Release>:/MAP:$<TARGET_FILE_DIR:Main>/Main.map>"
+  )
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
