@@ -52,11 +52,42 @@ OFF_ID = 80
 REPO = Path(__file__).resolve().parent.parent
 LOCAL = REPO / "src" / "bin" / "Data" / "Local"
 
-FILES = [
-    LOCAL / "Movereq.bmd",
-    LOCAL / "Eng" / "MoveReq_eng.bmd",
-    LOCAL / "Por" / "MoveReq_por.bmd",
-    LOCAL / "Spn" / "movereq_spn.bmd",
+LOCALES = {
+    "root": LOCAL / "Movereq.bmd",
+    "eng": LOCAL / "Eng" / "MoveReq_eng.bmd",
+    "por": LOCAL / "Por" / "MoveReq_por.bmd",
+    "spn": LOCAL / "Spn" / "movereq_spn.bmd",
+}
+
+FILES = list(LOCALES.values())
+
+# Warp entries to append. The gate is the arrival point, taken from Gate.bmd and
+# chosen by which gate other maps actually lead into -- 103 is the one Lorencia's
+# gate 102 targets, and 114 is the only destination gate on the Crywolf map.
+#
+# max_level is 400 rather than 0: every unrestricted warp in the table uses 400,
+# and no record anywhere uses 0, so 400 is how "no ceiling" is spelled here.
+NEW_ENTRIES = [
+    {
+        "index": 24,
+        "sub": "Crywolf",
+        "level": 300,
+        "max_level": 400,
+        "zen": 15000,
+        "gate": 114,
+        "names": {"root": "Crywolf", "eng": "Crywolf",
+                  "por": "Crywolf", "spn": "Crywolf"},
+    },
+    {
+        "index": 26,
+        "sub": "Valley_of_Loren",
+        "level": 10,
+        "max_level": 400,
+        "zen": 500,
+        "gate": 103,
+        "names": {"root": "Valley of Loren", "eng": "Valley of Loren",
+                  "por": "Vale de Loren", "spn": "Valle de Loren"},
+    },
 ]
 
 # gate id -> required level. Keeps the client's warp menu in sync with the
@@ -176,7 +207,58 @@ def cmd_patch(_argv) -> int:
     return 0
 
 
-COMMANDS = {"list": cmd_list, "check": cmd_check, "patch": cmd_patch}
+def encode_record(entry, locale):
+    """Builds one 84-byte plaintext record in the layout MoveCommandData.cpp
+    reads (MOVEREQINFO_FILE, pack(1)): index, two 32-byte UTF-8 name fields,
+    then level, max level, zen and gate as int32."""
+    name = entry["names"][locale].encode("utf-8")
+    sub = entry["sub"].encode("utf-8")
+    if len(name) > 31 or len(sub) > 31:
+        raise ValueError(f"name too long for the 32-byte field: {name!r} / {sub!r}")
+
+    rec = bytearray(REC)
+    struct.pack_into("<i", rec, 0, entry["index"])
+    rec[4:4 + len(name)] = name
+    rec[36:36 + len(sub)] = sub
+    struct.pack_into("<4i", rec, OFF_LEVEL,
+                     entry["level"], entry["max_level"], entry["zen"], entry["gate"])
+    return bytes(rec)
+
+
+def cmd_add(_argv) -> int:
+    """Appends NEW_ENTRIES to each locale file and bumps the header count.
+
+    Refuses to write if an index is already taken or the 50 record slots would
+    overflow, so running it twice cannot produce duplicates."""
+    for locale, path in LOCALES.items():
+        raw = bytearray(path.read_bytes())
+        count = struct.unpack_from("<i", raw, 0)[0]
+        capacity = (len(raw) - HDR) // REC
+
+        taken = {struct.unpack_from("<i", rec, 0)[0] for _, rec in decode(bytes(raw))}
+        clash = [e["index"] for e in NEW_ENTRIES if e["index"] in taken]
+        if clash:
+            print(f"ABORT {path.name}: index already in use: {clash}")
+            return 1
+        if count + len(NEW_ENTRIES) > capacity:
+            print(f"ABORT {path.name}: only {capacity - count} free slots")
+            return 1
+
+        for n, entry in enumerate(NEW_ENTRIES):
+            start = HDR + (count + n) * REC
+            raw[start:start + REC] = xor(encode_record(entry, locale))
+
+        struct.pack_into("<i", raw, 0, count + len(NEW_ENTRIES))
+        path.write_bytes(bytes(raw))
+
+        print(f"{path.name}: {count} -> {count + len(NEW_ENTRIES)} registros")
+        for entry in NEW_ENTRIES:
+            print(f"    idx {entry['index']:<3} {entry['names'][locale]:<18} "
+                  f"lvl={entry['level']:<4} zen={entry['zen']:<6} gate={entry['gate']}")
+    return 0
+
+
+COMMANDS = {"list": cmd_list, "check": cmd_check, "patch": cmd_patch, "add": cmd_add}
 
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "check"
